@@ -138,3 +138,17 @@ function talk() {
 </script>
 </body>
 </html>
+<div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+  <button onclick="quickTalk('疲れた')">疲れた</button>
+  <button onclick="quickTalk('勉強したい')">勉強したい</button>
+  <button onclick="quickTalk('雑談したい')">雑談したい</button>
+  <button onclick="quickTalk('今週の予定は？')">今週の予定は？</button>
+  <button onclick="quickTalk('おすすめの曲ある？')">おすすめの曲ある？</button>
+</div>
+
+<script>
+function quickTalk(text) {
+  document.getElementById("userInput").value = text;
+  sendMessage();
+}
+</script>
