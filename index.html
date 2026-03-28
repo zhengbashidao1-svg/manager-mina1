@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マネージャーミナ</title>
+
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#f5f7fb;
+  text-align:center;
+}
+.avatar{
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  overflow:hidden;
+  margin:20px auto;
+  border:6px solid white;
+}
+.avatar img{
+  width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="avatar">
+  <img id="minaImage" src="mina.PNG">
+</div>
+
+<h1>ミナ</h1>
+<p id="minaText">読み込み中...</p>
+
+<script>
+const days=["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+
+function getTime(hour){
+ if(hour<12)return"morning";
+ if(hour<18)return"day";
+ return"night";
+}
+
+function update(){
+ const now=new Date();
+ const day=days[now.getDay()];
+ const time=getTime(now.getHours());
+
+ const img=document.getElementById("minaImage");
+ const list=[
+  `mina_${day}_${time}.PNG`,
+  `mina_${day}.PNG`,
+  "mina.PNG"
+ ];
+
+ function load(i){
+  if(i>=list.length)return;
+  const t=new Image();
+  t.onload=()=>img.src=list[i];
+  t.onerror=()=>load(i+1);
+  t.src=list[i];
+ }
+ load(0);
+
+ document.getElementById("minaText").innerText=time;
+}
+
+update();
+</script>
+
+</body>
+</html>
