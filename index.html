@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ミナ</title>
+  <meta name="theme-color" content="#eef4ff">
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --line:#dbe7ff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --soft:#eef4ff;
+      --accent:#5b7cff;
+      --good:#e7f7ea;
+      --good-text:#167a2f;
+      --warn:#fff4db;
+      --warn-text:#9a6a00;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+    }
+    .app{
+      max-width:560px;
+      margin:0 auto;
+      min-height:100vh;
+      padding:18px 16px 100px;
+    }
+    .title{
+      font-size:28px;
+      font-weight:800;
+      margin:8px 0 6px;
+    }
+    .sub{
+      color:var(--muted);
+      line-height:1.6;
+      margin-bottom:18px;
+    }
+    .hero{
+      background:linear-gradient(180deg,#f9fbff,#eef4ff);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:20px 16px 18px;
+      text-align:center;
+      box-shadow:0 8px 28px rgba(31,41,55,.05);
+    }
+    .avatar{
+      width:190px;
+      height:190px;
+      margin:0 auto 14px;
+      border-radius:50%;
+      overflow:hidden;
+      border:6px solid #fff;
+      box-shadow:0 10px 24px rgba(91,124,255,.14);
+      background:#fff;
+    }
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .mina-name{
+      font-size:30px;
+      font-weight:800;
+      margin:2px 0 6px;
+    }
+    .speech{
+      font-size:16px;
+      line-height:1.7;
+      margin:0;
+    }
+    .circle-menu{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-top:18px;
+    }
+    .circle-item{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:14px 8px 12px;
+      text-align:center;
+      box-shadow:0 8px 18px rgba(31,41,55,.04);
+      cursor:pointer;
+      transition:.15s transform,.15s box-shadow,.15s border-color;
+    }
+    .circle-item:active{transform:scale(.98)}
+    .circle{
+      width:84px;
+      height:84px;
+      border-radius:50%;
+      margin:0 auto 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--soft);
+      font-size:30px;
+    }
+    .circle-item.active{
+      border-color:#b8cbff;
+      box-shadow:0 10px 22px rgba(91,124,255,.11);
+    }
+    .label{
+      font-size:17px;
+      font-weight:800;
+    }
+    .mini{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.5;
+    }
+    .panel{
+      display:none;
+      margin-top:16px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:0 8px 18px rgba(31,41,55,.04);
+    }
+    .panel.active{display:block}
+    .panel h3{
+      margin:0 0 10px;
+      font-size:20px;
+    }
+    .kpi{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+      margin-top:12px;
+    }
+    .box{
+      background:#f9fbff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+    .box .cap{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .box .val{
+      font-size:20px;
+      font-weight:800;
+      line-height:1.4;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:700;
+      margin-top:10px;
+      border:1px solid var(--line);
+      background:var(--soft);
+    }
+    .good{background:var(--good); color:var(--good-text); border-color:#cbead2}
+    .warn{background:var(--warn); color:var(--warn-text); border-color:#f2ddb0}
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      background:#edf3ff;
+      color:#1f2c5b;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .btn.primary{background:var(--accent); color:#fff}
+    .footer-note{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+      margin-top:10px;
+    }
+    @media (max-width:520px){
+      .title{font-size:25px}
+      .mina-name{font-size:28px}
+      .circle{width:72px;height:72px;font-size:28px}
+      .circle-item{padding:12px 6px}
+      .label{font-size:15px}
+      .avatar{width:170px;height:170px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="title">マネージャーミナ</div>
+    <div class="sub">ホームを丸UIに変更。天気・ゴミ・洗濯を自動表示して、ボタンで切り替えできる版です。</div>
+
+    <section class="hero">
+      <div class="avatar">
+        <img id="minaImage" src="mina.PNG" alt="ミナ">
+      </div>
+      <div class="mina-name">ミナ</div>
+      <p class="speech" id="minaSpeech">今日もサポートするよ、マスター✨</p>
+
+      <div class="circle-menu">
+        <button class="circle-item active" data-panel="weatherPanel" onclick="showPanel('weatherPanel', this)">
+          <div class="circle">☀️</div>
+          <div class="label">天気</div>
+          <div class="mini" id="weatherMini">読み込み中...</div>
+        </button>
+
+        <button class="circle-item" data-panel="trashPanel" onclick="showPanel('trashPanel', this)">
+          <div class="circle">🗑️</div>
+          <div class="label">ゴミ</div>
+          <div class="mini" id="trashMini">読み込み中...</div>
+        </button>
+
+        <button class="circle-item" data-panel="laundryPanel" onclick="showPanel('laundryPanel', this)">
+          <div class="circle">👕</div>
+          <div class="label">洗濯</div>
+          <div class="mini" id="laundryMini">読み込み中...</div>
+        </button>
+      </div>
+    </section>
+
+    <section id="weatherPanel" class="panel active">
+      <h3>今日の天気</h3>
+      <div class="row">
+        <div id="umbrellaBadge" class="badge">傘判定を確認中…</div>
+      </div>
+      <div class="kpi">
+        <div class="box">
+          <div class="cap">天気</div>
+          <div class="val" id="weatherSummary">読み込み中...</div>
+        </div>
+        <div class="box">
+          <div class="cap">気温</div>
+          <div class="val" id="tempSummary">読み込み中...</div>
+        </div>
+      </div>
+      <div class="box" style="margin-top:12px">
+        <div class="cap">ミナの一言</div>
+        <div class="val" id="weatherAdvice" style="font-size:16px;font-weight:700">読み込み中...</div>
+      </div>
+      <div class="footer-note">上池袋・豊島区あたり向けの簡易表示です。通信できないときは簡易メモ表示になります。</div>
+    </section>
+
+    <section id="trashPanel" class="panel">
+      <h3>今日出すゴミ</h3>
+      <div class="row">
+        <div id="trashBadge" class="badge">判定中...</div>
+      </div>
+      <div class="box" style="margin-top:12px">
+        <div class="cap">今日の回収</div>
+        <div class="val" id="trashMain">読み込み中...</div>
+      </div>
+      <div class="box" style="margin-top:12px">
+        <div class="cap">ミナの一言</div>
+        <div class="val" id="trashAdvice" style="font-size:16px;font-weight:700">読み込み中...</div>
+      </div>
+      <div class="footer-note">設定：火・金=可燃、月=紙/段ボール/布/プラ、土=缶/PET/びん、第2・第4水=金属/陶器/ガラス</div>
+    </section>
+
+    <section id="laundryPanel" class="panel">
+      <h3>洗濯アドバイス</h3>
+      <div class="row">
+        <div id="laundryBadge" class="badge">判定中...</div>
+      </div>
+      <div class="box" style="margin-top:12px">
+        <div class="cap">今日の外干し</div>
+        <div class="val" id="laundryToday">読み込み中...</div>
+      </div>
+      <div class="box" style="margin-top:12px">
+        <div class="cap">ミナの一言</div>
+        <div class="val" id="laundryAdvice" style="font-size:16px;font-weight:700">読み込み中...</div>
+      </div>
+      <div class="footer-note">降水量・降水確率・風を見て簡易判定しています。</div>
+    </section>
+  </div>
+
+  <script>
+    const LAT = 35.7365;
+    const LON = 139.7199;
+
+    function showPanel(id, el){
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.circle-item').forEach(btn => btn.classList.remove('active'));
+      if(el) el.classList.add('active');
+    }
+
+    function getWeekOfMonth(date){
+      return Math.ceil(date.getDate() / 7);
+    }
+
+    function getTrashInfo(){
+      const now = new Date();
+      const day = now.getDay(); // 0 Sun ... 6 Sat
+      const week = getWeekOfMonth(now);
+      if(day === 2 || day === 5){
+        return {
+          main:'🔥 可燃ごみ',
+          mini:'可燃',
+          badge:'今日は可燃ごみの日',
+          advice:'朝の回収前に、可燃ごみを出せばOKです。'
+        };
+      }
+      if(day === 1){
+        return {
+          main:'📦 紙・ダンボール・布・プラ',
+          mini:'紙/布/プラ',
+          badge:'今日は資源の日',
+          advice:'紙・段ボール・布・プラをまとめて出しましょう。'
+        };
+      }
+      if(day === 6){
+        return {
+          main:'🥫 缶・PET・びん',
+          mini:'缶/PET/びん',
+          badge:'今日は缶・PET・びんの日',
+          advice:'軽く洗ってから出すとスムーズです。'
+        };
+      }
+      if(day === 3 && (week === 2 || week === 4)){
+        return {
+          main:'🔩 金属・陶器・ガラス',
+          mini:'金属/陶器/ガラス',
+          badge:'今日は不燃系の回収日',
+          advice:'割れ物は安全に包んで出しましょう。'
+        };
+      }
+      return {
+        main:'今日は回収なし',
+        mini:'なし',
+        badge:'今日は出すものなし',
+        advice:'今日は無理に出さず、次の回収日に備えましょう。'
+      };
+    }
+
+    function weatherCodeToText(code){
+      const map = {
+        0:'快晴',1:'晴れ',2:'晴れ時々くもり',3:'くもり',
+        45:'霧',48:'霧',51:'弱い霧雨',53:'霧雨',55:'強い霧雨',
+        61:'弱い雨',63:'雨',65:'強い雨',71:'弱い雪',73:'雪',75:'強い雪',
+        80:'にわか雨',81:'雨がち',82:'強いにわか雨',95:'雷雨'
+      };
+      return map[code] || '変わりやすい空';
+    }
+
+    function setBadge(id, text, type){
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'badge' + (type ? ' ' + type : '');
+    }
+
+    function applyTrashInfo(){
+      const info = getTrashInfo();
+      document.getElementById('trashMini').textContent = info.mini;
+      document.getElementById('trashMain').textContent = info.main;
+      document.getElementById('trashAdvice').textContent = info.advice;
+      setBadge('trashBadge', info.badge, info.main.includes('なし') ? '' : 'good');
+    }
+
+    function applyFallbackWeather(){
+      document.getElementById('weatherMini').textContent = '通信なし';
+      document.getElementById('weatherSummary').textContent = '天気取得失敗';
+      document.getElementById('tempSummary').textContent = '--';
+      document.getElementById('weatherAdvice').textContent = '通信できないので、外出前に天気アプリを一度だけ確認しましょう。';
+      setBadge('umbrellaBadge', '傘は念のため折りたたみ推奨', 'warn');
+
+      document.getElementById('laundryMini').textContent = '要確認';
+      document.getElementById('laundryToday').textContent = '外干しは天気アプリ確認後';
+      document.getElementById('laundryAdvice').textContent = '晴れていれば外干し、怪しければ部屋干しが安全です。';
+      setBadge('laundryBadge', '洗濯は要確認', 'warn');
+
+      document.getElementById('minaSpeech').textContent = '通信できないみたいです。今日は天気だけ先に確認しましょう。';
+    }
+
+    async function loadWeather(){
+      try{
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,windspeed_10m_max&timezone=Asia%2FTokyo&forecast_days=1`;
+        const res = await fetch(url);
+        if(!res.ok) throw new Error('weather fetch failed');
+        const data = await res.json();
+        const code = data.daily.weathercode[0];
+        const tMax = Math.round(data.daily.temperature_2m_max[0]);
+        const tMin = Math.round(data.daily.temperature_2m_min[0]);
+        const pop = Math.round(data.daily.precipitation_probability_max[0] || 0);
+        const rain = Number(data.daily.precipitation_sum[0] || 0);
+        const wind = Math.round(data.daily.windspeed_10m_max[0] || 0);
+
+        const weatherText = weatherCodeToText(code);
+        document.getElementById('weatherMini').textContent = weatherText;
+        document.getElementById('weatherSummary').textContent = weatherText;
+        document.getElementById('tempSummary').textContent = `${tMin}〜${tMax}℃`;
+
+        let umbrellaText = '傘はいらない';
+        let umbrellaType = 'good';
+        if(pop >= 40 || rain >= 1){
+          umbrellaText = '傘があると安心';
+          umbrellaType = 'warn';
+        }
+        if(pop >= 70 || rain >= 3){
+          umbrellaText = '傘が必要';
+          umbrellaType = 'warn';
+        }
+        setBadge('umbrellaBadge', umbrellaText, umbrellaType);
+
+        let weatherAdvice = '大きな崩れはなさそうです。';
+        if(pop >= 40 || rain >= 1) weatherAdvice = 'にわか雨の可能性があります。折りたたみ傘が安心です。';
+        if(wind >= 18) weatherAdvice += ' 風がやや強めです。';
+
+        document.getElementById('weatherAdvice').textContent = weatherAdvice;
+
+        let laundryMini = '外干しOK';
+        let laundryMain = '今日は外干ししやすい日';
+        let laundryAdvice = '薄手中心なら気持ちよく乾きやすいです。';
+        let laundryType = 'good';
+
+        if(pop >= 40 || rain >= 1){
+          laundryMini = '部屋干し寄り';
+          laundryMain = '今日は外干し非推奨';
+          laundryAdvice = '雨の可能性があるので、部屋干しか短時間干しが安全です。';
+          laundryType = 'warn';
+        }
+        if(wind >= 20 && pop < 40){
+          laundryAdvice = '風はありますが乾きやすいです。飛ばされやすい物は注意。';
+        }
+
+        document.getElementById('laundryMini').textContent = laundryMini;
+        document.getElementById('laundryToday').textContent = laundryMain;
+        document.getElementById('laundryAdvice').textContent = laundryAdvice;
+        setBadge('laundryBadge', laundryMini, laundryType);
+
+        const trash = getTrashInfo().main;
+        document.getElementById('minaSpeech').textContent = `今日は「${weatherText}」です。${trash === '今日は回収なし' ? 'ゴミ出しはお休み。' : trash + 'の日です。'} 無理なく進めましょう。`;
+      }catch(err){
+        applyFallbackWeather();
+      }
+    }
+
+    applyTrashInfo();
+    loadWeather();
+  </script>
+</body>
+</html>
