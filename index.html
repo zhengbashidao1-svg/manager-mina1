@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>マネージャーミナ UI改善版</title>
+<style>
+:root{
+  --bg:#f4f7fc;
+  --card:#ffffff;
+  --line:#dbe7ff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --soft:#eef4ff;
+  --soft2:#f8fbff;
+  --accent:#6e93ff;
+  --shadow:0 10px 24px rgba(31,41,55,.06);
+  --navh:84px;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;height:100%;overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+  background:var(--bg);color:var(--text);
+}
+.app{
+  max-width:560px;
+  height:100vh;
+  margin:0 auto;
+  padding:10px 10px calc(var(--navh) + env(safe-area-inset-bottom) + 8px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.screen{
+  display:none;
+  height:100%;
+  min-height:0;
+}
+.screen.active{display:flex}
+.home-screen{
+  flex-direction:column;
+}
+.hero{
+  position:relative;
+  flex:1;
+  min-height:0;
+  background:linear-gradient(180deg,#fbfdff,#edf4ff);
+  border:1px solid var(--line);
+  border-radius:28px;
+  box-shadow:var(--shadow);
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  overflow:hidden;
+}
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:auto -50px -90px auto;
+  width:220px;height:220px;
+  background:radial-gradient(circle, rgba(122,167,255,.18), rgba(122,167,255,0));
+  pointer-events:none;
+}
+.avatar-shell{
+  flex:1;
+  min-height:0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:hidden;
+}
+.avatar-frame{
+  width:100%;height:100%;
+  max-width:520px;
+  background:#fff;
+  border:1px solid #eef3ff;
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 8px 20px rgba(91,124,255,.10);
+}
+.avatar-frame img{
+  width:100%;height:100%;
+  object-fit:contain;
+  object-position:center center;
+  display:block;
+  padding:12px 4px 0;
+  background:#fff;
+}
+.speech{
+  position:relative;
+  background:rgba(255,255,255,.96);
+  border:1px solid #e8efff;
+  border-radius:22px;
+  padding:14px 16px;
+  box-shadow:0 8px 18px rgba(31,41,55,.05);
+}
+.speech::after{
+  content:"";
+  position:absolute;left:20px;bottom:-10px;
+  width:18px;height:18px;
+  background:rgba(255,255,255,.96);
+  border-right:1px solid #e8efff;
+  border-bottom:1px solid #e8efff;
+  transform:rotate(45deg);
+}
+.speech-main{
+  font-size:16px;line-height:1.7;font-weight:800;
+  min-height:52px;
+}
+.info-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.mini-card{
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:11px;
+  min-height:96px;
+  box-shadow:0 6px 16px rgba(31,41,55,.04);
+}
+.mini-label{
+  font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:800;
+}
+.mini-main{
+  font-size:14px;font-weight:800;line-height:1.45;
+}
+.mini-sub{
+  font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px;
+}
+.badge-row{
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.badge{
+  display:inline-flex;align-items:center;
+  padding:8px 12px;border-radius:999px;
+  font-size:12px;font-weight:800;
+  border:1px solid var(--line);background:var(--soft);
+}
+.good{background:#e8f8eb;color:#176b2e;border-color:#cde8d1}
+.primary-btn{
+  border:none;border-radius:16px;
+  padding:14px 16px;
+  font-size:16px;font-weight:800;
+  color:#fff;background:linear-gradient(90deg,#6d93ff,#7ea7ff);
+  box-shadow:0 8px 18px rgba(91,124,255,.18);
+}
+.talk-screen{
+  flex-direction:column;
+  min-height:0;
+}
+.talk-layout{
+  flex:1;
+  min-height:0;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.talk-header{
+  padding:12px 14px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#fbfdff,#f3f7ff);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.header-avatar{
+  width:42px;height:42px;border-radius:50%;
+  overflow:hidden;border:1px solid var(--line);background:#fff;flex:0 0 auto;
+}
+.header-avatar img{
+  width:100%;height:100%;object-fit:cover;
+}
+.header-title{
+  font-size:17px;font-weight:800;
+}
+.header-sub{
+  font-size:12px;color:var(--muted);margin-top:2px;
+}
+.chat-log{
+  flex:1;min-height:0;overflow:auto;
+  padding:12px;
+  background:#f7faff;
+}
+.chat-row{
+  display:flex;gap:8px;align-items:flex-end;
+  margin-bottom:10px;
+}
+.chat-row.user{
+  justify-content:flex-end;
+}
+.chat-icon{
+  width:34px;height:34px;border-radius:50%;
+  overflow:hidden;flex:0 0 auto;
+  border:1px solid var(--line);background:#fff;
+}
+.chat-icon img{
+  width:100%;height:100%;object-fit:cover;
+}
+.bubble{
+  max-width:74%;
+  padding:10px 12px;
+  border-radius:16px;
+  line-height:1.65;
+  font-size:15px;
+  box-shadow:0 4px 12px rgba(31,41,55,.04);
+  white-space:pre-wrap;
+}
+.mina-bubble{
+  background:#fff;border:1px solid var(--line);color:var(--text);
+}
+.user-bubble{
+  background:#6e93ff;color:#fff;
+}
+.quick{
+  padding:8px 10px;
+  display:flex;gap:8px;
+  overflow-x:auto;
+  border-top:1px solid var(--line);
+  background:#fff;
+}
+.quick-btn{
+  flex:0 0 auto;
+  border:none;border-radius:999px;
+  padding:10px 14px;
+  background:var(--soft);color:#222;
+  font-weight:800;
+  border:1px solid var(--line);
+}
+.input-area{
+  display:flex;gap:8px;
+  padding:10px;
+  border-top:1px solid var(--line);
+  background:#fff;
+}
+.input-area input{
+  flex:1;min-width:0;
+  padding:12px 14px;border-radius:12px;
+  border:1px solid var(--line);
+  font-size:16px;
+}
+.send-btn{
+  border:none;border-radius:12px;
+  padding:12px 16px;
+  background:#6e93ff;color:#fff;font-weight:800;
+}
+.panel{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:14px;
+  box-shadow:var(--shadow);
+  height:100%;
+  overflow:auto;
+}
+.panel-title{margin:0 0 8px;font-size:22px;font-weight:800}
+.panel-sub{margin:0 0 12px;font-size:14px;line-height:1.7;color:var(--muted)}
+.study-top{
+  display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+}
+.score{
+  background:var(--soft2);border:1px solid var(--line);border-radius:18px;
+  padding:10px 12px;min-width:116px;text-align:center;
+}
+.score-num{font-size:26px;font-weight:800}
+.question-card{
+  background:linear-gradient(180deg,#fbfdff,#f3f7ff);
+  border:1px solid var(--line);border-radius:20px;padding:14px;margin-top:12px;
+}
+.question-en{font-size:22px;font-weight:800;line-height:1.6;margin:0 0 8px}
+.question-ja{font-size:13px;color:var(--muted);line-height:1.7;margin:0}
+.choices{display:grid;gap:10px;margin-top:14px}
+.choice-btn,.ghost-btn{
+  border:none;border-radius:16px;padding:13px 14px;font-size:16px;font-weight:800;cursor:pointer;
+}
+.choice-btn{
+  text-align:left;background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:0 4px 12px rgba(31,41,55,.04);
+}
+.chat-answer{margin-top:14px;display:flex;gap:8px}
+.chat-answer input{
+  flex:1;min-width:0;border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px 14px;font-size:16px;
+}
+.ghost-btn{background:#fff;border:1px solid var(--line);color:var(--text)}
+.result{
+  margin-top:12px;background:var(--soft2);border:1px solid var(--line);border-radius:18px;padding:12px;font-size:15px;line-height:1.8;min-height:60px;
+}
+.footer-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.small-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nav{
+  position:fixed;left:0;right:0;bottom:0;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(245,247,251,.95);
+  backdrop-filter:blur(12px);
+  border-top:1px solid #dfe8ff;
+  z-index:10;
+}
+.nav-inner{
+  max-width:560px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+}
+.nav-btn{
+  border:none;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:16px;padding:10px 6px;
+  box-shadow:0 6px 14px rgba(31,41,55,.04);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:12px;font-weight:800;
+}
+.nav-btn.active{
+  background:linear-gradient(180deg,#eef4ff,#dfeaff);border-color:#bfd1ff;color:#3454c6;
+}
+.nav-ico{font-size:20px}
+@media (max-width:520px){
+  .speech-main{font-size:15px}
+  .question-en{font-size:20px}
+  .mini-main{font-size:13px}
+  .avatar-frame img{padding:12px 2px 0}
+  .hero{padding:8px}
+  .bubble{max-width:80%}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="screen-home" class="screen home-screen active">
+    <div class="hero">
+      <div class="avatar-shell">
+        <div class="avatar-frame">
+          <img id="minaImage" src="mina1.PNG" alt="ミナ">
+        </div>
+      </div>
+
+      <div class="speech">
+        <div class="speech-main" id="minaSpeech">読み込み中...</div>
+      </div>
+
+      <div class="info-row">
+        <div class="mini-card">
+          <div class="mini-label">天気</div>
+          <div class="mini-main" id="weatherMain">取得中...</div>
+          <div class="mini-sub" id="weatherSub">少し待ってね</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">イベント</div>
+          <div class="mini-main" id="eventMain">取得中...</div>
+          <div class="mini-sub" id="eventSub">少し待ってね</div>
+        </div>
+      </div>
+
+      <div class="badge-row">
+        <div class="badge" id="timeBadge">時間帯読み込み中...</div>
+        <div class="badge" id="faceBadge">表情読み込み中...</div>
+        <div class="badge good">衣装：今日固定</div>
+      </div>
+
+      <button class="primary-btn" onclick="openScreen('talk')">ミナと話す</button>
+    </div>
+  </section>
+
+  <section id="screen-talk" class="screen talk-screen">
+    <div class="talk-layout">
+      <div class="talk-header">
+        <div class="header-avatar"><img id="headerMinaIcon" src="mina1.PNG" alt="ミナ"></div>
+        <div>
+          <div class="header-title">ミナ</div>
+          <div class="header-sub">今の気分に合わせて話せるよ</div>
+        </div>
+      </div>
+
+      <div class="chat-log" id="chatLog"></div>
+
+      <div class="quick">
+        <button class="quick-btn" onclick="sendQuick('今日は少し疲れた')">疲れた</button>
+        <button class="quick-btn" onclick="sendQuick('今日はやる気がある')">やる気ある</button>
+        <button class="quick-btn" onclick="sendQuick('英語を勉強したい')">英語勉強</button>
+        <button class="quick-btn" onclick="sendQuick('今日は雑談したい')">雑談</button>
+      </div>
+
+      <div class="input-area">
+        <input id="talkInput" placeholder="ここに話しかける">
+        <button class="send-btn" onclick="sendTalk()">送信</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="screen-study" class="screen">
+    <div class="panel">
+      <div class="study-top">
+        <div>
+          <h2 class="panel-title">英語勉強</h2>
+          <p class="panel-sub">ミナが問題を出します。ボタンでも、下の入力でも答えられます。</p>
+        </div>
+        <div class="score">
+          <div style="font-size:12px;color:var(--muted);font-weight:800;">正解数</div>
+          <div class="score-num" id="scoreNum">0</div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <p class="question-en" id="questionEn">I ___ coffee every morning.</p>
+        <p class="question-ja" id="questionJa">入る語を選ぶか入力してください。</p>
+        <div class="choices" id="choicesArea"></div>
+        <div class="chat-answer">
+          <input id="chatInput" type="text" placeholder="ここに英語で答える">
+          <button class="ghost-btn" onclick="submitChatAnswer()">送信</button>
+        </div>
+        <div class="result" id="resultBox">ミナ：この問題、落ち着いて考えてみよう。</div>
+        <div class="footer-actions">
+          <button class="primary-btn" onclick="nextQuestion()">次の問題</button>
+          <button class="ghost-btn" onclick="showHint()">ヒント</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screen-plan" class="screen">
+    <div class="panel">
+      <h2 class="panel-title">予定</h2>
+      <div class="small-card-grid">
+        <div class="mini-card">
+          <div class="mini-label">今日の優先</div>
+          <div class="mini-main">英語 15分</div>
+          <div class="mini-sub">最初の1歩だけやる</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">次の予定</div>
+          <div class="mini-main">今日の予定を確認</div>
+          <div class="mini-sub">外出前に持ち物チェック</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-screen="home" onclick="openScreen('home')"><div class="nav-ico">🏠</div><div>ホーム</div></button>
+    <button class="nav-btn" data-screen="study" onclick="openScreen('study')"><div class="nav-ico">📘</div><div>勉強</div></button>
+    <button class="nav-btn" data-screen="talk" onclick="openScreen('talk')"><div class="nav-ico">💬</div><div>会話</div></button>
+    <button class="nav-btn" data-screen="plan" onclick="openScreen('plan')"><div class="nav-ico">📅</div><div>予定</div></button>
+  </div>
+</nav>
+
+<script>
+const LAT = 35.7365, LON = 139.7199;
+const morningImages = ["mina1","mina2","mina3","mina4"];
+const eveningImages = ["mina_evening1","mina_evening2","mina_evening3","mina_evening4"];
+const nightImages = ["mina_night1","mina_night2","mina_night3","mina_night4"];
+const faceTypes = ["sleepy","smile","normal"];
+const faceJp = { sleepy:"眠い", smile:"笑顔", normal:"真顔" };
+const STORAGE_KEY = "mina_chat_memory_v2";
+const PROFILE_KEY = "mina_profile_memory_v2";
+let currentBaseImage = "", score = 0, currentQuestionIndex = 0;
+
+const questions = [
+  { en: "I ___ coffee every morning.", ja: "毎朝コーヒーを飲みます。", choices: ["drink", "drinks", "drank"], answer: "drink", hint: "主語が I のとき、現在形の基本形。" },
+  { en: "She ___ to school by bus.", ja: "彼女はバスで学校に行きます。", choices: ["go", "goes", "going"], answer: "goes", hint: "主語が She のときは動詞に s/es。" },
+  { en: "We ___ English today.", ja: "私たちは今日英語を勉強します。", choices: ["study", "studies", "studied"], answer: "study", hint: "主語が We のときは基本形。" },
+  { en: "He ___ TV last night.", ja: "彼は昨夜テレビを見ました。", choices: ["watch", "watched", "watches"], answer: "watched", hint: "last night があるので過去形。" },
+  { en: "They ___ happy now.", ja: "彼らは今うれしいです。", choices: ["is", "am", "are"], answer: "are", hint: "They の be動詞。" }
+];
+
+function loadMemory(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];}catch(e){return [];} }
+function saveMemory(memory){ localStorage.setItem(STORAGE_KEY, JSON.stringify(memory.slice(-30))); }
+function loadProfile(){ try{return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {};}catch(e){return {};} }
+function saveProfile(profile){ localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); }
+let memory = loadMemory(), profile = loadProfile();
+
+function getTimeRange(){
+  const hour = new Date().getHours();
+  if(hour >= 7 && hour < 14) return "morning";
+  if(hour >= 14 && hour < 20) return "evening";
+  if(hour >= 20 && hour < 24) return "night";
+  return "lateNight";
+}
+function getRandomItem(array){ return array[Math.floor(Math.random()*array.length)]; }
+function getTodayKey(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function getTodayFixedImageBase(){
+  const todayKey=getTodayKey(), range=getTimeRange(), key="minaFixedBase_"+todayKey+"_"+range;
+  const stored=localStorage.getItem(key);
+  if(stored) return stored;
+  let baseList=morningImages;
+  if(range==="evening") baseList=eveningImages;
+  if(range==="lateNight") baseList=nightImages;
+  const picked=getRandomItem(baseList);
+  localStorage.setItem(key,picked);
+  return picked;
+}
+function setSpeech(range, face){
+  const speech=document.getElementById("minaSpeech");
+  const map={
+    morning:{sleepy:"おはよう、マスター。まだ少し眠いけど、今日は気持ちよく始められそうです。",smile:"おはよう、マスター。今日もいい日にしようね。最初の一歩だけ一緒に決めよう。",normal:"おはよう。まずは、今日やることを一つだけ決めましょう。"},
+    evening:{sleepy:"少し疲れが出る時間ですね。ここからは無理せず、丁寧に整えていきましょう。",smile:"夕方です。ここまで進めた分、ちゃんとえらいです。最後は気持ちよく締めましょう。",normal:"夕方です。あと少し、静かに整えて締めましょう。"},
+    night:{sleepy:"夜ですね。今日は頑張りすぎなくて大丈夫ですよ。少しずつ休む準備をしましょう。",smile:"今日もお疲れさま。少し肩の力を抜いて、やさしく過ごしましょう。",normal:"夜です。残りは無理のない範囲だけで進めましょう。"},
+    lateNight:{sleepy:"もう遅いです。今日は休むのを優先しましょう。水分だけでも整えると楽になります。",smile:"眠る準備、いっしょに整えようか。今日ここまで来たの、十分えらいです。",normal:"深夜です。ここからは回復の時間にしましょう。"}
+  };
+  speech.textContent = map[range][face];
+}
+function setMinaImage(){
+  const range=getTimeRange();
+  const img=document.getElementById("minaImage");
+  const headerIcon=document.getElementById("headerMinaIcon");
+  const timeBadge=document.getElementById("timeBadge");
+  const faceBadge=document.getElementById("faceBadge");
+  let rangeText="7:00〜14:00";
+  if(range==="evening") rangeText="14:00〜20:00";
+  if(range==="night") rangeText="20:00〜24:00";
+  if(range==="lateNight") rangeText="0:00〜7:00";
+  const baseName=getTodayFixedImageBase();
+  const face=getRandomItem(faceTypes);
+  timeBadge.textContent="時間帯："+rangeText;
+  faceBadge.textContent="表情："+faceJp[face];
+  const candidates=[baseName+"_"+face+".PNG",baseName+"_"+face+".png",baseName+".PNG",baseName+".png","mina.PNG","mina.png"];
+  function tryLoad(index){
+    if(index>=candidates.length) return;
+    const src=candidates[index], tester=new Image();
+    tester.onload=function(){ img.src=src; headerIcon.src=src; currentBaseImage=src; };
+    tester.onerror=function(){ tryLoad(index+1); };
+    tester.src=src;
+  }
+  tryLoad(0);
+  setSpeech(range, face);
+}
+function weatherCodeToText(code){
+  const map={0:"快晴",1:"晴れ",2:"晴れ時々くもり",3:"くもり",45:"霧",48:"霧",51:"弱い霧雨",53:"霧雨",55:"強い霧雨",61:"弱い雨",63:"雨",65:"強い雨",71:"弱い雪",73:"雪",75:"強い雪",80:"にわか雨",81:"雨がち",82:"強いにわか雨",95:"雷雨"};
+  return map[code] || "変わりやすい空";
+}
+async function loadWeather(){
+  try{
+    const url="https://api.open-meteo.com/v1/forecast?latitude="+LAT+"&longitude="+LON+"&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=1";
+    const res=await fetch(url), data=await res.json();
+    const code=data.daily.weathercode[0], tMax=Math.round(data.daily.temperature_2m_max[0]), tMin=Math.round(data.daily.temperature_2m_min[0]), pop=Math.round(data.daily.precipitation_probability_max[0]||0);
+    document.getElementById("weatherMain").textContent=weatherCodeToText(code)+" "+tMin+"〜"+tMax+"℃";
+    document.getElementById("weatherSub").textContent=pop>=50 ? "雨の可能性あり。折りたたみ傘が安心。" : "大きな崩れは少なめ。外出しやすい日。";
+  }catch(e){
+    document.getElementById("weatherMain").textContent="天気取得失敗";
+    document.getElementById("weatherSub").textContent="通信状況を確認してね";
+  }
+}
+function stripHtml(html){ return html.replace(/<script[\s\S]*?<\/script>/gi,"").replace(/<style[\s\S]*?<\/style>/gi,"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim(); }
+async function fetchThroughProxy(url){ const proxy="https://api.allorigins.win/raw?url="+encodeURIComponent(url); const res=await fetch(proxy); return await res.text(); }
+async function loadEvents(){
+  const eventMain=document.getElementById("eventMain"), eventSub=document.getElementById("eventSub");
+  try{
+    const geigekiHtml=await fetchThroughProxy("https://www.geigeki.jp/en/performance/"), text=stripHtml(geigekiHtml);
+    const m=text.match(/(White Hand Chorus|TMT Performing Arts Academy|The Crucible|Exhibition \[painting\]|ONGAKU DAIGAKU FESTIVAL ORCHESTRA CONCERT Vol\.15)/i);
+    if(m){ eventMain.textContent=m[1]; eventSub.textContent="東京芸術劇場の公演・イベント"; }
+    else throw new Error("no parse");
+  }catch(e){
+    eventMain.textContent="イベント取得失敗";
+    eventSub.textContent="後で再読み込みしてね";
+  }
+}
+function openScreen(name){
+  document.querySelectorAll(".screen").forEach(el=>el.classList.remove("active"));
+  document.getElementById("screen-"+name).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(btn=>btn.classList.remove("active"));
+  const target=document.querySelector('.nav-btn[data-screen="'+name+'"]');
+  if(target) target.classList.add("active");
+}
+function renderQuestion(){
+  const q=questions[currentQuestionIndex];
+  document.getElementById("questionEn").textContent=q.en;
+  document.getElementById("questionJa").textContent=q.ja;
+  document.getElementById("chatInput").value="";
+  document.getElementById("resultBox").textContent="ミナ：この問題、落ち着いて考えてみよう。";
+  const area=document.getElementById("choicesArea");
+  area.innerHTML="";
+  q.choices.forEach(choice=>{
+    const btn=document.createElement("button");
+    btn.className="choice-btn";
+    btn.textContent=choice;
+    btn.onclick=function(){ judgeAnswer(choice); };
+    area.appendChild(btn);
+  });
+}
+function judgeAnswer(answer){
+  const q=questions[currentQuestionIndex], normalized=String(answer).trim().toLowerCase(), correct=q.answer.toLowerCase(), box=document.getElementById("resultBox");
+  if(normalized===correct){ score+=1; document.getElementById("scoreNum").textContent=score; box.innerHTML="ミナ：正解です。<br>答えは <strong>"+q.answer+"</strong> です。"; }
+  else { box.innerHTML="ミナ：今回はおしいです。<br>正解は <strong>"+q.answer+"</strong> です。"; }
+}
+function submitChatAnswer(){
+  const val=document.getElementById("chatInput").value;
+  if(!val.trim()){ document.getElementById("resultBox").textContent="ミナ：空欄のままなので、ひとこと入れてみよう。"; return; }
+  judgeAnswer(val);
+}
+function nextQuestion(){ currentQuestionIndex=(currentQuestionIndex+1)%questions.length; renderQuestion(); }
+function showHint(){ const q=questions[currentQuestionIndex]; document.getElementById("resultBox").textContent="ミナのヒント："+q.hint; }
+
+function addTalkMessage(role, text, save=true){
+  const log=document.getElementById("chatLog");
+  const row=document.createElement("div");
+  row.className="chat-row "+role;
+  if(role==="mina"){
+    const icon=document.createElement("div");
+    icon.className="chat-icon";
+    const img=document.createElement("img");
+    img.src=document.getElementById("headerMinaIcon").src;
+    icon.appendChild(img);
+    const bubble=document.createElement("div");
+    bubble.className="bubble mina-bubble";
+    bubble.textContent=text;
+    row.appendChild(icon);
+    row.appendChild(bubble);
+  }else{
+    const bubble=document.createElement("div");
+    bubble.className="bubble user-bubble";
+    bubble.textContent=text;
+    row.appendChild(bubble);
+  }
+  log.appendChild(row);
+  log.scrollTop=log.scrollHeight;
+  if(save){
+    memory.push({role, text, at:Date.now()});
+    saveMemory(memory);
+  }
+}
+function renderSavedMessages(){
+  const log=document.getElementById("chatLog");
+  log.innerHTML="";
+  if(memory.length===0){
+    addTalkMessage("mina","おかえり。今日はどんな感じ？ 元気、ふつう、疲れた、のどれでも大丈夫だよ。", false);
+    return;
+  }
+  memory.forEach(m=>addTalkMessage(m.role,m.text,false));
+}
+function updateProfileFromText(text){
+  if(text.includes("疲")) profile.mood="tired";
+  if(text.includes("元気") || text.includes("やる気")) profile.mood="energetic";
+  if(text.includes("眠")) profile.mood="sleepy";
+  if(text.includes("英語")) profile.goal="english";
+  if(text.includes("勉強")) profile.goal="study";
+  if(text.includes("雑談")) profile.goal="chat";
+  saveProfile(profile);
+}
+function recentUserMessages(n=3){
+  return memory.filter(m=>m.role==="user").slice(-n).map(m=>m.text);
+}
+function getMinaReply(userText){
+  updateProfileFromText(userText);
+  const t=userText.toLowerCase();
+  const recent=recentUserMessages(2).join(" / ");
+  if(t.includes("疲") || t.includes("しんど")) return "それはしんどかったね。今日は無理に詰め込まず、まず一つだけ軽いことを終わらせようか。";
+  if(t.includes("元気") || t.includes("やる気")) return "いい流れだね。今の勢いがあるうちに、最初の15分だけ集中して進めよう。";
+  if(t.includes("英語")) return "いいね。じゃあ勉強ページで1問だけ解いてみようか。小さく始めるのが一番強いよ。";
+  if(t.includes("勉強")){ if(profile.goal==="english") return "昨日から英語の流れがあるし、そのまま英語から入るのがよさそう。1問だけ一緒にやろう。"; return "いいね。勉強は最初の1問を始めるまでがいちばん大変だから、そこだけ一緒に越えよう。"; }
+  if(t.includes("雑談") || t.includes("話")) return "もちろん。今日はどんなことが気になってる？ 楽しかったことでも、ちょっと疲れたことでも大丈夫。";
+  if(t.includes("予定") || t.includes("スケジュール")) return "予定を整理しよう。今日やることを3つまでに絞ると、かなり動きやすくなるよ。";
+  if(t.includes("眠")) return "眠そうだね。今日は無理に頑張るより、少し早めに休める形を作る方がよさそう。";
+  if(recent.includes("疲") && (t.includes("どうしよう") || t.includes("何する"))) return "さっき疲れてるって言ってたし、今は『回復しながら進める』が合ってそう。水分を飲んで、5分だけ軽くやろうか。";
+  if(profile.mood==="tired") return "ちゃんと聞いてるよ。今は疲れ気味なのを前提に、負担の少ない進め方を一緒に考えよう。";
+  if(profile.mood==="energetic") return "その調子いいね。今の勢いを使って、一つ具体的に進めることを決めよう。";
+  return "うん、聞いてるよ。今の気分に合わせて進めたいから、もう少しだけ教えてくれる？";
+}
+function quickTalk(text){
+  addTalkMessage("user", text);
+  const reply=getMinaReply(text);
+  addTalkMessage("mina", reply);
+}
+function sendTalk(){
+  const input=document.getElementById("talkInput");
+  const val=input.value.trim();
+  if(!val) return;
+  quickTalk(val);
+  input.value="";
+}
+document.getElementById("talkInput").addEventListener("keydown", function(e){ if(e.key==="Enter") sendTalk(); });
+
+window.onload=function(){
+  setMinaImage();
+  loadWeather();
+  loadEvents();
+  renderQuestion();
+  renderSavedMessages();
+  openScreen('home');
+};
+</script>
+</body>
+</html>
