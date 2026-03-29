@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ミナ 会話記憶版</title>
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#000;
+  overflow:hidden;
+}
+.mina-bg{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  object-fit:contain;
+  z-index:0;
+}
+.overlay{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.45));
+  z-index:1;
+}
+.speech{
+  position:absolute;
+  bottom:130px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90%;
+  background:rgba(0,0,0,0.72);
+  color:#fff;
+  padding:16px;
+  border-radius:18px;
+  font-size:18px;
+  line-height:1.6;
+  text-align:left;
+  z-index:3;
+  box-sizing:border-box;
+}
+.chat-log{
+  position:absolute;
+  top:12px;
+  left:0;
+  width:100%;
+  max-height:34%;
+  overflow:auto;
+  z-index:3;
+  padding:10px;
+  box-sizing:border-box;
+}
+.msg{
+  margin:6px 0;
+  padding:10px 12px;
+  border-radius:14px;
+  max-width:78%;
+  line-height:1.6;
+  white-space:pre-wrap;
+}
+.user{
+  background:#4c6fff;
+  color:#fff;
+  margin-left:auto;
+}
+.mina{
+  background:#fff;
+  color:#000;
+}
+.quick{
+  position:absolute;
+  bottom:195px;
+  left:0;
+  width:100%;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:0 10px;
+  box-sizing:border-box;
+  z-index:3;
+}
+.quick button{
+  flex:0 0 auto;
+  border:none;
+  border-radius:999px;
+  padding:10px 14px;
+  background:rgba(255,255,255,.92);
+  color:#222;
+  font-weight:bold;
+}
+.input-area{
+  position:absolute;
+  bottom:72px;
+  width:100%;
+  display:flex;
+  gap:8px;
+  padding:10px;
+  box-sizing:border-box;
+  z-index:4;
+}
+input{
+  flex:1;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  min-width:0;
+}
+.send-btn{
+  padding:12px 16px;
+  border:none;
+  border-radius:12px;
+  background:#6e93ff;
+  color:#fff;
+  font-weight:bold;
+}
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:#111;
+  padding:10px 0 calc(10px + env(safe-area-inset-bottom));
+  z-index:5;
+}
+.nav button{
+  background:none;
+  color:#fff;
+  border:none;
+  font-size:14px;
+}
+.small{
+  font-size:12px;
+  opacity:.8;
+}
+</style>
+</head>
+<body>
+
+<img src="mina1.PNG" class="mina-bg" id="minaImage">
+<div class="overlay"></div>
+
+<div class="chat-log" id="chatLog"></div>
+
+<div class="quick">
+  <button onclick="sendQuick('今日は少し疲れた')">疲れた</button>
+  <button onclick="sendQuick('今日はやる気がある')">やる気ある</button>
+  <button onclick="sendQuick('英語を勉強したい')">英語勉強</button>
+  <button onclick="sendQuick('今日は雑談したい')">雑談</button>
+</div>
+
+<div class="speech" id="speech">ミナ：おかえり、マスター。今日はどうする？</div>
+
+<div class="input-area">
+  <input id="input" placeholder="ここに話しかける">
+  <button class="send-btn" onclick="send()">送信</button>
+</div>
+
+<div class="nav">
+  <button>🏠<div class="small">ホーム</div></button>
+  <button>📘<div class="small">勉強</div></button>
+  <button>💬<div class="small">会話</div></button>
+  <button>📅<div class="small">予定</div></button>
+</div>
+
+<script>
+const STORAGE_KEY = "mina_chat_memory_v1";
+const PROFILE_KEY = "mina_profile_memory_v1";
+
+function loadMemory(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveMemory(memory){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(memory.slice(-30)));
+}
+
+function loadProfile(){
+  try{
+    return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {};
+  }catch(e){
+    return {};
+  }
+}
+
+function saveProfile(profile){
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+}
+
+let memory = loadMemory();
+let profile = loadProfile();
+
+function addMsg(role, text, save=true){
+  const log = document.getElementById("chatLog");
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  div.innerText = (role === "user" ? "あなた：" : "ミナ：") + text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+
+  if(save){
+    memory.push({role, text, at: Date.now()});
+    saveMemory(memory);
+  }
+}
+
+function renderSavedMessages(){
+  const log = document.getElementById("chatLog");
+  log.innerHTML = "";
+  if(memory.length === 0){
+    addMsg("mina", "おかえり、マスター。今日はどんな感じ？", false);
+    return;
+  }
+  memory.forEach(m => addMsg(m.role, m.text, false));
+  const lastMina = [...memory].reverse().find(m => m.role === "mina");
+  if(lastMina){
+    document.getElementById("speech").innerText = "ミナ：" + lastMina.text;
+  }
+}
+
+function updateProfileFromText(text){
+  if(text.includes("疲")) profile.mood = "tired";
+  if(text.includes("元気") || text.includes("やる気")) profile.mood = "energetic";
+  if(text.includes("眠")) profile.mood = "sleepy";
+  if(text.includes("英語")) profile.goal = "english";
+  if(text.includes("勉強")) profile.goal = "study";
+  if(text.includes("雑談")) profile.goal = "chat";
+  saveProfile(profile);
+}
+
+function recentUserMessages(n=3){
+  return memory.filter(m => m.role === "user").slice(-n).map(m => m.text);
+}
+
+function aiReply(text){
+  updateProfileFromText(text);
+
+  const t = text.toLowerCase();
+  const recent = recentUserMessages(2).join(" / ");
+
+  if(t.includes("疲") || t.includes("しんど")){
+    return "それはしんどかったね。無理に詰め込まないで大丈夫だよ。今日は一つだけ軽いことを終わらせようか。";
+  }
+
+  if(t.includes("元気") || t.includes("やる気")){
+    return "いいね、その流れいい感じ。前向きに動けそうだから、最初の15分だけ集中する形で始めよう。";
+  }
+
+  if(t.includes("英語")){
+    return "いいね。英語をやろう。まずは1問だけ解いて、勢いが出たらもう1問いこう。";
+  }
+
+  if(t.includes("勉強")){
+    if(profile.goal === "english"){
+      return "昨日から英語の流れがあるし、そのまま英語から入るのがよさそう。1問だけ一緒にやろう。";
+    }
+    return "いいね。勉強は最初の1問を始めるまでがいちばん大変だから、そこだけ一緒に越えよう。";
+  }
+
+  if(t.includes("雑談") || t.includes("話")){
+    return "もちろん。最近のこと、楽しかったことでも、ちょっと疲れたことでも、なんでも聞くよ。";
+  }
+
+  if(t.includes("予定") || t.includes("スケジュール")){
+    return "予定を整理しよう。今の気分を考えると、やることは3つまでに絞るのがよさそうだよ。";
+  }
+
+  if(t.includes("眠")){
+    return "眠そうだね。今日は無理に頑張るより、少し早めに休める形を作る方がよさそう。";
+  }
+
+  if(recent.includes("疲") && (t.includes("どうしよう") || t.includes("何する"))){
+    return "さっき疲れてるって言ってたし、今は『回復しながら進める』が合ってそう。水分を飲んで、5分だけ軽くやろうか。";
+  }
+
+  if(profile.mood === "tired"){
+    return "ちゃんと聞いてるよ。今は疲れ気味なのを前提に、負担の少ない進め方を一緒に考えよう。";
+  }
+
+  if(profile.mood === "energetic"){
+    return "その調子いいね。今の勢いを使って、一つ具体的に進めることを決めよう。";
+  }
+
+  return "うん、聞いてるよ。今の気分に合わせて進めたいから、もう少しだけ教えてくれる？";
+}
+
+function send(){
+  const input = document.getElementById("input");
+  const text = input.value.trim();
+  if(!text) return;
+
+  addMsg("user", text);
+  const reply = aiReply(text);
+
+  setTimeout(() => {
+    addMsg("mina", reply);
+    document.getElementById("speech").innerText = "ミナ：" + reply;
+  }, 350);
+
+  input.value = "";
+}
+
+function sendQuick(text){
+  addMsg("user", text);
+  const reply = aiReply(text);
+  addMsg("mina", reply);
+  document.getElementById("speech").innerText = "ミナ：" + reply;
+}
+
+document.getElementById("input").addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    send();
+  }
+});
+
+renderSavedMessages();
+</script>
+
+</body>
+</html>
