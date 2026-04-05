@@ -3,86 +3,169 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ミナ改良版</title>
+<title>ミナAI</title>
 
 <style>
-body{margin:0;background:#f4f7fc;font-family:sans-serif;}
-.stage{position:relative;width:100%;height:70vh;overflow:hidden;}
-.layer{position:absolute;bottom:0;width:100%;object-fit:contain;}
-.comment{padding:20px;font-size:18px;font-weight:bold;}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f3f4f6;
+}
+
+/* アプリ全体 */
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  padding-bottom: 90px;
+}
+
+/* キャラ */
+.character {
+  position: relative;
+  width: 100%;
+}
+
+#base {
+  width: 100%;
+  display: block;
+}
+
+/* 口 */
+#mouth {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, -50%);
+  width: 18%;
+}
+
+/* セリフ */
+.message {
+  background: white;
+  margin: 12px;
+  padding: 16px;
+  border-radius: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.6;
+}
+
+/* 入力 */
+.input-area {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: white;
+  padding: 10px;
+}
+
+.input-wrap {
+  max-width: 430px;
+  margin: auto;
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="stage">
-  <img id="body" class="layer">
-  <img id="face" class="layer">
-  <img id="mouth" class="layer">
+<div class="app">
+  <div class="character">
+    <img src="mina_base.png" id="base">
+    <img src="mouth_close.png" id="mouth">
+  </div>
+
+  <div class="message" id="message">
+    おはよう、マスター。
+  </div>
 </div>
 
-<div id="text" class="comment">おはよう、マスター。</div>
-
-<input id="input" placeholder="話しかける">
-<button onclick="talk()">送信</button>
+<div class="input-area">
+  <div class="input-wrap">
+    <input type="text" id="input" placeholder="話しかける">
+    <button onclick="sendMessage()">送信</button>
+  </div>
+</div>
 
 <script>
+const mouth = document.getElementById("mouth");
+const message = document.getElementById("message");
+const input = document.getElementById("input");
 
-function loadImg(el, name){
-  const exts=[".png",".PNG",".jpg",".JPG"];
-  let i=0;
-  function next(){
-    if(i>=exts.length)return;
-    let src=name+exts[i];
-    let img=new Image();
-    img.onload=()=>el.src=src;
-    img.onerror=()=>{i++;next();}
-    img.src=src;
-  }
-  next();
+const mouthImages = [
+  "mouth_close.png",
+  "mouth_small.png",
+  "mouth_medium.png",
+  "mouth_large.png"
+];
+
+let interval;
+
+/* 口パク */
+function startTalking() {
+  interval = setInterval(() => {
+    const i = Math.floor(Math.random() * mouthImages.length);
+    mouth.src = mouthImages[i];
+  }, 120);
 }
 
-let state={
-  outfit:"maid",
-  face:"normal"
-};
-
-function apply(){
-  loadImg(body,"mina_"+state.outfit);
-  loadImg(face,"face_"+state.face);
+function stopTalking() {
+  clearInterval(interval);
+  mouth.src = "mouth_close.png";
 }
 
-function mouthAnim(){
-  let open=true;
-  let count=0;
-  let interval=setInterval(()=>{
-    loadImg(mouth, open?"mouth_open":"mouth_close");
-    open=!open;
-    count++;
-    if(count>10)clearInterval(interval);
-  },120);
+/* 返答 */
+function reply(text) {
+  text = text.toLowerCase();
+
+  if (text.includes("おはよう")) return "おはよう、マスター。今日も少し進めよう。";
+  if (text.includes("疲れ")) return "無理しすぎないで。少し休もう。";
+  if (text.includes("勉強")) return "いい流れ。そのまま続けよう。";
+  return "ちゃんと聞いてるよ、マスター。";
 }
 
-function talk(){
-  let t=input.value;
+/* 送信 */
+function sendMessage() {
+  const text = input.value.trim();
 
-  if(t.includes("疲")){
-    state.face="sad";
-    text.innerText="無理しなくていいよ。";
-  }else if(t.includes("眠")){
-    state.outfit="sleep";
-    text.innerText="今日は休もう。";
-  }else{
-    state.face="smile";
-    text.innerText="いいね、その調子。";
-  }
+  if (!text) return;
 
-  apply();
-  mouthAnim();
+  // ユーザー発言表示
+  message.textContent = "マスター：「" + text + "」";
+  startTalking();
+
+  setTimeout(() => {
+    stopTalking();
+  }, 1500);
+
+  input.value = "";
+
+  // ミナの返答
+  setTimeout(() => {
+    message.textContent = reply(text);
+    startTalking();
+
+    setTimeout(stopTalking, 2000);
+  }, 1700);
 }
 
-apply();
-
+/* Enterキー対応 */
+input.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") sendMessage();
+});
 </script>
 
 </body>
